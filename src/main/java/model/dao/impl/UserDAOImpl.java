@@ -1,5 +1,6 @@
 package model.dao.impl;
 
+import model.EntityMapper;
 import model.dao.UserDAO;
 import model.entities.User;
 
@@ -56,14 +57,7 @@ public class UserDAOImpl implements UserDAO {
         try (Statement stmt = connection.createStatement()) {
             ResultSet rs = stmt.executeQuery(sql);
             while (rs.next()) {
-                User user = User.builder()
-                        .id(rs.getLong("id"))
-                        .username(rs.getString("username"))
-                        .email(rs.getString("email"))
-                        .password(rs.getString("password"))
-                        .build();
-
-                users.add(user);
+                users.add(EntityMapper.mapResultSetToEntity(rs, User.class));
             }
         } catch (SQLException e) {
             throw new RuntimeException("Failed to list users", e);
