@@ -21,11 +21,8 @@ public class UserDAOImpl implements UserDAO {
 
     @Override
     public User create(User user){
-        String query = QueryLoader.getQuery("insert_user.ftl", Map.of(
-                "username", user.getUsername(),
-                "email", user.getEmail(),
-                "password", user.getPassword()
-        ));
+        String query = QueryLoader.getQuery("insert_user.ftl", Collections.emptyMap());
+
         try (PreparedStatement stmt = connection.prepareStatement(query,
                 Statement.RETURN_GENERATED_KEYS)) {
             stmt.setString(1, user.getUsername());
