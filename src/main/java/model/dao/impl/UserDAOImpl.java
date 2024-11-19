@@ -56,12 +56,13 @@ public class UserDAOImpl implements UserDAO {
         try (Statement stmt = connection.createStatement()) {
             ResultSet rs = stmt.executeQuery(sql);
             while (rs.next()) {
-                User user = new User(
-                        rs.getString("username"),
-                        rs.getString("email"),
-                        rs.getString("password")
-                );
-                user.setId(rs.getLong("id"));
+                User user = User.builder()
+                        .id(rs.getLong("id"))
+                        .username(rs.getString("username"))
+                        .email(rs.getString("email"))
+                        .password(rs.getString("password"))
+                        .build();
+
                 users.add(user);
             }
         } catch (SQLException e) {

@@ -12,7 +12,11 @@ public class App {
             .findFirst()
             .ifPresentOrElse(
                 user -> System.out.println("User found: " + user.getUsername()),
-                () -> userDAO.create(new User("john_doe", "john@acme.com", "password123")));
+                () -> userDAO.create(User.builder()
+                        .username("john_doe")
+                        .email("john@acme.com")
+                        .password("password123")
+                        .build()));
 
     }
 }
