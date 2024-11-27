@@ -2,6 +2,7 @@ package model.dao.impl;
 
 import model.EntityMapper;
 import model.QueryLoader;
+import model.Validatable;
 import model.dao.UserDAO;
 import model.entities.User;
 
@@ -9,7 +10,6 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 public class UserDAOImpl implements UserDAO {
 
@@ -20,7 +20,15 @@ public class UserDAOImpl implements UserDAO {
     }
 
     @Override
-    public User create(User user){
+    public User create(User user) {
+        try {
+            user.validate();
+        } catch (Validatable.ValidationException e) {
+            // handle exception...
+        }
+
+        // At this point, user is valid; we should guarantee that the user is unique...
+
         String query = QueryLoader.getQuery("insert_user.ftl", Collections.emptyMap());
 
         try (PreparedStatement stmt = connection.prepareStatement(query,
