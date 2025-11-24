@@ -8,23 +8,19 @@ import model.Validatable;
 
 @Data
 @Builder
-@NoArgsConstructor // required by our custom entity mapper
-@AllArgsConstructor // required by lombock
+@NoArgsConstructor
+@AllArgsConstructor
 public class User implements Validatable {
     private Long id;
     private String username;
-    private String email;
     private String password;
 
     @Override
     public void validate() throws ValidationException {
-        if (username == null || username.isEmpty()) {
+        if (username == null || username.isBlank()) {
             throw new ValidationException("Username cannot be empty");
         }
-        if (email == null || email.isEmpty()) {
-            throw new ValidationException("Email cannot be empty");
-        }
-        if (password == null || password.isEmpty()) {
+        if (password == null || password.isBlank()) {
             throw new ValidationException("Password cannot be empty");
         }
     }
