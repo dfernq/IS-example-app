@@ -26,6 +26,9 @@ public class EntityMapper {
                     // Set field value using the ResultSet if the column exists
                     Object value = resultSet.getObject(field.getName());
                     if (value != null) {
+                        if ((field.getType() == Boolean.class || field.getType() == boolean.class) && value instanceof Number) {
+                            value = ((Number) value).intValue() != 0;
+                        }
                         field.set(entity, value);
                     }
                 } catch (SQLException ignored) {
@@ -38,4 +41,3 @@ public class EntityMapper {
         return entity;
     }
 }
-
