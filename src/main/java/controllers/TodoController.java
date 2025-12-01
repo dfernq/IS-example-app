@@ -1,5 +1,7 @@
 package controllers;
 
+import events.AppEventType;
+import events.EventBus;
 import model.entities.Task;
 import model.entities.User;
 import services.TaskService;
@@ -10,23 +12,31 @@ import java.util.List;
 /**
  * Connects the Swing view with the service layer.
  */
-public class TodoController {
+public class TodoController implements Controller {
 
     private final TaskService taskService;
     private final TodoView view;
     private final User currentUser;
+    private final EventBus eventBus;
 
-    public TodoController(TaskService taskService, TodoView view, User currentUser) {
+    public TodoController(TaskService taskService, TodoView view, User currentUser, EventBus eventBus) {
         this.taskService = taskService;
         this.view = view;
         this.currentUser = currentUser;
+        this.eventBus = eventBus;
         view.setCurrentUser(currentUser.getUsername());
         wireActions();
         refreshTasks();
     }
 
+    @Override
     public void show() {
         view.setVisible(true);
+    }
+
+    @Override
+    public void close() {
+        view.dispose();
     }
 
     private void wireActions() {
@@ -40,6 +50,7 @@ public class TodoController {
             taskService.createTask(currentUser.getId(), view.getTitleInput(), view.getDescriptionInput());
             view.clearInputs();
             refreshTasks();
+            eventBus.publish(AppEventType.TASKS_CHANGED, currentUser);
         } catch (Exception e) {
             view.showError(e.getMessage());
         }
@@ -54,6 +65,7 @@ public class TodoController {
         try {
             taskService.toggleCompletion(currentUser.getId(), selected.getId());
             refreshTasks();
+            eventBus.publish(AppEventType.TASKS_CHANGED, currentUser);
         } catch (Exception e) {
             view.showError(e.getMessage());
         }
@@ -68,6 +80,7 @@ public class TodoController {
         try {
             taskService.deleteTask(currentUser.getId(), selected.getId());
             refreshTasks();
+            eventBus.publish(AppEventType.TASKS_CHANGED, currentUser);
         } catch (RuntimeException e) {
             view.showError(e.getMessage());
         }

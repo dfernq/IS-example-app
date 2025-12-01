@@ -1,29 +1,35 @@
 package controllers;
 
+import events.AppEventType;
+import events.EventBus;
 import model.entities.User;
 import services.AuthService;
 import views.LoginView;
 
-import java.util.function.Consumer;
-
 /**
  * Handles login and sign-up flow, notifies listeners when authentication succeeds.
  */
-public class LoginController {
+public class LoginController implements Controller {
 
     private final AuthService authService;
     private final LoginView view;
-    private final Consumer<User> onAuthenticated;
+    private final EventBus eventBus;
 
-    public LoginController(AuthService authService, LoginView view, Consumer<User> onAuthenticated) {
+    public LoginController(AuthService authService, LoginView view, EventBus eventBus) {
         this.authService = authService;
         this.view = view;
-        this.onAuthenticated = onAuthenticated;
+        this.eventBus = eventBus;
         wireActions();
     }
 
+    @Override
     public void show() {
         view.setVisible(true);
+    }
+
+    @Override
+    public void close() {
+        view.dispose();
     }
 
     private void wireActions() {
@@ -36,8 +42,7 @@ public class LoginController {
             User user = authService.login(view.getUsernameInput(), view.getPasswordInput());
             view.clearPassword();
             view.setVisible(false);
-            view.dispose();
-            onAuthenticated.accept(user);
+            eventBus.publish(AppEventType.LOGIN_SUCCESS, user);
         } catch (RuntimeException e) {
             view.showError(e.getMessage());
             view.clearPassword();
@@ -49,8 +54,7 @@ public class LoginController {
             User user = authService.signup(view.getUsernameInput(), view.getPasswordInput());
             view.clearPassword();
             view.setVisible(false);
-            view.dispose();
-            onAuthenticated.accept(user);
+            eventBus.publish(AppEventType.LOGIN_SUCCESS, user);
         } catch (Exception e) {
             view.showError(e.getMessage());
             view.clearPassword();
