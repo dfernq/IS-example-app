@@ -1,13 +1,12 @@
-import controllers.LoginController;
-import controllers.TodoController;
+import application.ApplicationCoordinator;
+import application.ControllerFactory;
+import events.EventBus;
 import model.DBConnection;
 import model.dao.impl.TaskDAOImpl;
 import model.dao.impl.UserDAOImpl;
-import model.entities.User;
 import services.AuthService;
 import services.TaskService;
-import views.LoginView;
-import views.TodoView;
+import views.ViewFactory;
 
 import javax.swing.SwingUtilities;
 import java.sql.Connection;
@@ -21,16 +20,11 @@ public class App {
         TaskService taskService = new TaskService(taskDAO);
         AuthService authService = new AuthService(userDAO);
 
-        SwingUtilities.invokeLater(() -> {
-            LoginView loginView = new LoginView();
-            LoginController loginController = new LoginController(authService, loginView, user -> openTodo(taskService, user));
-            loginController.show();
-        });
-    }
+        EventBus eventBus = new EventBus();
+        ViewFactory viewFactory = new ViewFactory();
+        ControllerFactory controllerFactory = new ControllerFactory(taskService, authService, eventBus, viewFactory);
+        ApplicationCoordinator coordinator = new ApplicationCoordinator(controllerFactory, eventBus);
 
-    private static void openTodo(TaskService taskService, User user) {
-        TodoView todoView = new TodoView();
-        TodoController todoController = new TodoController(taskService, todoView, user);
-        todoController.show();
+        SwingUtilities.invokeLater(coordinator::start);
     }
 }
